@@ -146,11 +146,5 @@ public class ReceiverActivity extends AppCompatActivity {
         super.onDestroy();
         isRunning = false;
         try {
-            if (serverSocket != null) {
-                serverSocket.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
+            if (serverSock e) {
+            
